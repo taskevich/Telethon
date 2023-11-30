@@ -53,9 +53,7 @@ class Session(ABC):
         """
         raise NotImplementedError
 
-    @auth_key.setter
-    @abstractmethod
-    def auth_key(self, value):
+    def set_auth_key(self, value):
         """
         Sets the ``AuthKey`` to be used for the saved data center.
         """

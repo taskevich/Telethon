@@ -59,8 +59,7 @@ class MemorySession(Session):
     def auth_key(self):
         return self._auth_key
 
-    @auth_key.setter
-    def auth_key(self, value):
+    def set_auth_key(self, value):
         self._auth_key = value
 
     @property

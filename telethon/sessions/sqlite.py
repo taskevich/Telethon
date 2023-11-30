@@ -174,8 +174,7 @@ class SQLiteSession(MemorySession):
         else:
             self._auth_key = None
 
-    @MemorySession.auth_key.setter
-    def auth_key(self, value):
+    def set_auth_key(self, value):
         self._auth_key = value
         self._update_session_table()
 

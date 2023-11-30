@@ -556,7 +556,10 @@ class TelegramBaseClient(abc.ABC):
             # We don't want to init or modify anything if we were already connected
             return
 
-        self.session.auth_key = self._sender.auth_key
+        set_auth_key = self.session.set_auth_key(self._sender.auth_key)
+        if inspect.isawaitable(set_auth_key):
+            await set_auth_key
+
         save = self.session.save()
         if inspect.isawaitable(save):
             await save
@@ -793,7 +796,9 @@ class TelegramBaseClient(abc.ABC):
         # auth_key's are associated with a server, which has now changed
         # so it's not valid anymore. Set to None to force recreating it.
         self._sender.auth_key.key = None
-        self.session.auth_key = None
+        set_auth_key = self.session.set_auth_key(None)
+        if inspect.isawaitable(set_auth_key):
+            await set_auth_key
         save = self.session.save()
         if inspect.isawaitable(save):
             await save
@@ -805,7 +810,10 @@ class TelegramBaseClient(abc.ABC):
         Callback from the sender whenever it needed to generate a
         new authorization key. This means we are not authorized.
         """
-        self.session.auth_key = auth_key
+        set_auth_key = self.session.set_auth_key(auth_key)
+        if inspect.isawaitable(set_auth_key):
+            await set_auth_key
+
         save = self.session.save()
         if inspect.isawaitable(save):
             await save
