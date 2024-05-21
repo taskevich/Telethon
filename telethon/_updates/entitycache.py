@@ -22,11 +22,7 @@ class EntityCache:
             self.hash_map[id] = Entity(EntityType.BOT if bot else EntityType.USER, id, hash)
 
     def get(self, id):
-        try:
-            hash, ty = self.hash_map[id]
-            return Entity(ty, id, hash)
-        except KeyError:
-            return None
+        return self.hash_map.get(id)
 
     def extend(self, users, chats):
         # See https://core.telegram.org/api/min for "issues" with "min constructors".
