@@ -440,7 +440,17 @@ class TelegramBaseClient(abc.ABC):
         self._message_box = MessageBox(self._log['messagebox'])
         self._mb_entity_cache = MbEntityCache()  # required for proper update handling (to know when to getDifference)
         self._entity_cache_limit = entity_cache_limit
-        self._sender = None
+        self._sender = MTProtoSender(
+            self.session.auth_key,
+            loggers=self._log,
+            retries=self._connection_retries,
+            delay=self._retry_delay,
+            auto_reconnect=self._auto_reconnect,
+            connect_timeout=self._timeout,
+            auth_key_callback=self._auth_key_callback,
+            updates_queue=self._updates_queue,
+            auto_reconnect_callback=self._handle_auto_reconnect
+        )
 
     # endregion
 
@@ -534,19 +544,6 @@ class TelegramBaseClient(abc.ABC):
             )
             if inspect.isawaitable(set_dc):
                 await set_dc
-
-        if not self._sender:
-            self._sender = MTProtoSender(
-                self.session.auth_key,
-                loggers=self._log,
-                retries=self._connection_retries,
-                delay=self._retry_delay,
-                auto_reconnect=self._auto_reconnect,
-                connect_timeout=self._timeout,
-                auth_key_callback=self._auth_key_callback,
-                updates_queue=self._updates_queue,
-                auto_reconnect_callback=self._handle_auto_reconnect
-            )
 
         if not await self._sender.connect(self._connection(
             self.session.server_address,
@@ -775,8 +772,7 @@ class TelegramBaseClient(abc.ABC):
         file; user disconnects however should close it since it means that
         their job with the client is complete and we should clean it up all.
         """
-        if self._sender:
-            await self._sender.disconnect()
+        await self._sender.disconnect()
         await helpers._cancel(self._log[__name__],
                               updates_handle=self._updates_handle,
                               keepalive_handle=self._keepalive_handle)
@@ -785,8 +781,6 @@ class TelegramBaseClient(abc.ABC):
         """
         Permanently switches the current connection to the new data center.
         """
-        if not self._sender:
-            raise RuntimeError('Cant switch dc if not connected')
         self._log[__name__].info('Reconnecting to new data center %s', new_dc)
         dc = await self._get_dc(new_dc)
 
