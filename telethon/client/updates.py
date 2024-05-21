@@ -163,10 +163,13 @@ class UpdateMethods:
 
                 client.add_event_handler(handler, events.NewMessage)
         """
+        async def callback_wrapper(*args: typing.Any, **kwargs: typing.Any):
+            asyncio.ensure_future(callback(*args, **kwargs))
+
         builders = events._get_handlers(callback)
         if builders is not None:
             for event in builders:
-                self._event_builders.append((event, callback))
+                self._event_builders.append((event, callback_wrapper))
             return
 
         if isinstance(event, type):
@@ -174,7 +177,7 @@ class UpdateMethods:
         elif not event:
             event = events.Raw()
 
-        self._event_builders.append((event, callback))
+        self._event_builders.append((event, callback_wrapper))
 
     def remove_event_handler(
             self: 'TelegramClient',
@@ -469,6 +472,7 @@ class UpdateMethods:
             self._log[__name__].exception(f'Fatal error handling updates (this is a bug in Telethon v{__version__}, please report it)')
             self._updates_error = e
             await self.disconnect()
+            # await self._reconnect(True)
 
     def _preprocess_updates(self, updates, users, chats):
         self._mb_entity_cache.extend(users, chats)
@@ -514,7 +518,7 @@ class UpdateMethods:
             # inserted because this is a rather expensive operation
             # (default's sqlite3 takes ~0.1s to commit changes). Do
             # it every minute instead. No-op if there's nothing new.
-            await self._save_states_and_entities()
+            # await self._save_states_and_entities()
 
             save = self.session.save()
             if inspect.isawaitable(save):

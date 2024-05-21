@@ -1,3 +1,4 @@
+import struct
 from typing import Optional, Tuple
 from enum import IntEnum
 from ..tl.types import InputPeerUser, InputPeerChat, InputPeerChannel
@@ -113,7 +114,7 @@ class Entity:
     Telegram doesn't need to add more fields to the entities. It can also be converted
     to bytes with ``bytes(entity)``, for a more compact representation.
     """
-    __slots__ = ('ty', 'id', 'hash')
+    __slots__ = ('ty', 'retained', 'input_peer')
 
     def __init__(
         self,
@@ -121,9 +122,15 @@ class Entity:
         id: int,
         hash: int
     ):
+        self.retained = False
         self.ty = ty
-        self.id = id
-        self.hash = hash
+        self.input_peer = (
+            InputPeerUser(id, hash)
+            if self.is_user
+            else InputPeerChat(id)
+            if ty == EntityType.GROUP
+            else InputPeerChannel(id, hash)
+        )
 
     @property
     def is_user(self):
@@ -173,7 +180,7 @@ class Entity:
         try:
             ty, id, hash = struct.unpack('<Bqq', blob)
         except struct.error:
-            raise ValueError(f'malformed entity data, got {string!r}') from None
+            raise ValueError(f'malformed entity data, got {blob!r}') from None
 
         return cls(EntityType(ty), id, hash)
 
