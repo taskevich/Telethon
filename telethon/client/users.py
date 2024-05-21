@@ -94,6 +94,7 @@ class UserMethods:
                     return result
             except (errors.ServerError, errors.RpcCallFailError,
                     errors.RpcMcgetFailError, errors.InterdcCallErrorError,
+                    errors.TimedOutError,
                     errors.InterdcCallRichErrorError) as e:
                 last_error = e
                 self._log[__name__].warning(
@@ -226,7 +227,7 @@ class UserMethods:
 
     async def get_entity(
             self: 'TelegramClient',
-            entity: 'hints.EntitiesLike') -> 'hints.Entity':
+            entity: 'hints.EntitiesLike') -> typing.Union['hints.Entity', typing.List['hints.Entity']]:
         """
         Turns the given entity into a valid Telegram :tl:`User`, :tl:`Chat`
         or :tl:`Channel`. You can also pass a list or iterable of entities,
