@@ -114,7 +114,7 @@ class Entity:
     Telegram doesn't need to add more fields to the entities. It can also be converted
     to bytes with ``bytes(entity)``, for a more compact representation.
     """
-    __slots__ = ('ty', 'retained', 'input_peer')
+    __slots__ = ('ty', 'id', 'hash', 'retained', 'input_peer')
 
     def __init__(
         self,
@@ -124,6 +124,8 @@ class Entity:
     ):
         self.retained = False
         self.ty = ty
+        self.id = id
+        self.hash = hash
         self.input_peer = (
             InputPeerUser(id, hash)
             if self.is_user
