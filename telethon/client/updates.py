@@ -472,7 +472,6 @@ class UpdateMethods:
             self._log[__name__].exception(f'Fatal error handling updates (this is a bug in Telethon v{__version__}, please report it)')
             self._updates_error = e
             await self.disconnect()
-            # await self._reconnect(True)
 
     def _preprocess_updates(self, updates, users, chats):
         self._mb_entity_cache.extend(users, chats)
