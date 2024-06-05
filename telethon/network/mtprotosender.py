@@ -486,7 +486,7 @@ class MTProtoSender:
                             self._pending_state[s.msg_id] = s
 
             try:
-                await asyncio.wait_for(self._connection.send(data), self._connect_timeout)
+                await self._connection.send(data)
             except IOError as e:
                 self._log.info('Connection closed while sending data')
                 self._start_reconnect(e)
