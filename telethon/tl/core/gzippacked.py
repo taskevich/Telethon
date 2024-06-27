@@ -1,11 +1,7 @@
+import gzip
 import struct
 
 from .. import TLObject
-
-try:
-    import pgzip as gzip
-except ImportError:
-    import gzip
 
 
 class GzipPacked(TLObject):
