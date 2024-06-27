@@ -46,15 +46,16 @@ class EntityCache:
         )
 
     def get_all_entities(self):
-        return (v for v in self.hash_map.values() if not v.retained)
+        entities = (v for v in self.hash_map.values() if not v.retained)
+        for entity in entities:
+            entity.retained = True
+        return entities
 
     def put(self, entity):
         self.hash_map[entity.id] = entity
 
     def retain(self, filter):
         self.hash_map = {k: v for k, v in self.hash_map.items() if filter(k)}
-        for v in self.hash_map.values():
-            v.retained = True
 
     def __len__(self):
         return len(self.hash_map)
