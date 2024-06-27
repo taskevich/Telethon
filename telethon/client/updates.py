@@ -517,7 +517,7 @@ class UpdateMethods:
             # inserted because this is a rather expensive operation
             # (default's sqlite3 takes ~0.1s to commit changes). Do
             # it every minute instead. No-op if there's nothing new.
-            # await self._save_states_and_entities()
+            await self._save_states_and_entities()
 
             save = self.session.save()
             if inspect.isawaitable(save):
