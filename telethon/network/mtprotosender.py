@@ -312,15 +312,15 @@ class MTProtoSender:
             return False
 
     async def _disconnect(self, error=None):
-        if self._connection is None:
-            self._log.info('Not disconnecting (already have no connection)')
-            return
-
-        self._log.info('Disconnecting from %s...', self._connection)
-        self._user_connected = False
         try:
-            self._log.debug('Closing current connection...')
-            await self._connection.disconnect()
+            if self._connection is None:
+                self._log.info('Not disconnecting (already have no connection)')
+                return
+            else:
+                self._log.info('Disconnecting from %s...', self._connection)
+                self._user_connected = False
+                self._log.debug('Closing current connection...')
+                await self._connection.disconnect()
         finally:
             self._log.debug('Cancelling %d pending message(s)...', len(self._pending_state))
             for state in self._pending_state.values():
@@ -350,14 +350,7 @@ class MTProtoSender:
         Cleanly disconnects and then reconnects.
         """
         self._log.info('Closing current connection to begin reconnect...')
-        if self._connection:
-            await self._connection.disconnect()
-
-        await helpers._cancel(
-            self._log,
-            send_loop_handle=self._send_loop_handle,
-            recv_loop_handle=self._recv_loop_handle
-        )
+        await self._disconnect()
 
         # TODO See comment in `_start_reconnect`
         # Perhaps this should be the last thing to do?
