@@ -350,7 +350,8 @@ class MTProtoSender:
         Cleanly disconnects and then reconnects.
         """
         self._log.info('Closing current connection to begin reconnect...')
-        await self._connection.disconnect()
+        if self._connection:
+            await self._connection.disconnect()
 
         await helpers._cancel(
             self._log,
