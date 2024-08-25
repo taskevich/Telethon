@@ -4,7 +4,6 @@ This module contains the BinaryReader utility class.
 import struct
 import time
 from datetime import datetime, timedelta, timezone
-from struct import unpack
 
 from ..errors import TypeNotFoundError
 from ..tl.alltlobjects import tlobjects
@@ -20,7 +19,7 @@ class BinaryReader:
     """
 
     def __init__(self, data):
-        self.stream = memoryview(data) if data else memoryview(bytes())
+        self.stream = data if data else bytes()
         self.position = 0
         self._last = None  # Should come in handy to spot -404 errors
 
@@ -84,7 +83,7 @@ class BinaryReader:
 
     def get_bytes(self):
         """Gets the byte array representing the current buffer as a whole."""
-        return self.stream.tobytes()
+        return self.stream
 
     # endregion
 
