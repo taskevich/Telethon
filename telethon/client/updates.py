@@ -163,13 +163,10 @@ class UpdateMethods:
 
                 client.add_event_handler(handler, events.NewMessage)
         """
-        async def callback_wrapper(*args: typing.Any, **kwargs: typing.Any):
-            asyncio.ensure_future(callback(*args, **kwargs))
-
         builders = events._get_handlers(callback)
         if builders is not None:
             for event in builders:
-                self._event_builders.append((event, callback_wrapper))
+                self._event_builders.append((event, callback))
             return
 
         if isinstance(event, type):
@@ -177,7 +174,7 @@ class UpdateMethods:
         elif not event:
             event = events.Raw()
 
-        self._event_builders.append((event, callback_wrapper))
+        self._event_builders.append((event, callback))
 
     def remove_event_handler(
             self: 'TelegramClient',

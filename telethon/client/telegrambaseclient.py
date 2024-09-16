@@ -441,6 +441,7 @@ class TelegramBaseClient(abc.ABC):
         self._message_box = MessageBox(self._log['messagebox'])
         self._mb_entity_cache = MbEntityCache()  # required for proper update handling (to know when to getDifference)
         self._entity_cache_limit = entity_cache_limit
+
         self._sender = MTProtoSender(
             self.session.auth_key,
             loggers=self._log,
@@ -452,6 +453,7 @@ class TelegramBaseClient(abc.ABC):
             updates_queue=self._updates_queue,
             auto_reconnect_callback=self._handle_auto_reconnect
         )
+
 
     # endregion
 
