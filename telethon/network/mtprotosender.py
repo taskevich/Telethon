@@ -337,7 +337,7 @@ class MTProtoSender:
             )
 
             self._log.info('Disconnection from %s complete!', self._connection)
-            self._connection = None
+            # self._connection = None
 
         if self._disconnected and not self._disconnected.done():
             if error:
@@ -350,7 +350,8 @@ class MTProtoSender:
         Cleanly disconnects and then reconnects.
         """
         self._log.info('Closing current connection to begin reconnect...')
-        await self._connection.disconnect()
+        if self._connection:
+            await self._connection.disconnect()
 
         await helpers._cancel(
             self._log,
@@ -514,10 +515,9 @@ class MTProtoSender:
             except InvalidBufferError as e:
                 if e.code == 429:
                     self._log.warning('Server indicated flood error at transport level: %s', e)
-                    await self._disconnect(error=e)
                 else:
                     self._log.exception('Server sent invalid buffer')
-                    self._start_reconnect(e)
+                self._start_reconnect(e)
                 return
             except Exception as e:
                 self._log.exception('Unhandled error while receiving data')
@@ -715,6 +715,10 @@ class MTProtoSender:
                 )
                 upd._self_outgoing = True
                 self._updates_queue.put_nowait(upd)
+            elif obj.CONSTRUCTOR_ID == _tl.messages.InvitedUsers.CONSTRUCTOR_ID:
+                obj.updates._self_outgoing = True
+                self._updates_queue.put_nowait(obj.updates)
+
         except AttributeError:
             pass
 
