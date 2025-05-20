@@ -271,6 +271,7 @@ class UpdateMethods:
             updates_to_dispatch = deque()
 
             while self.is_connected():
+                await asyncio.sleep(0.5)
                 if updates_to_dispatch:
                     if self._sequential_updates:
                         await self._dispatch_update(updates_to_dispatch.popleft())
@@ -444,15 +445,8 @@ class UpdateMethods:
                     updates_to_dispatch.extend(self._preprocess_updates(updates, users, chats))
                     continue
 
-                deadline = self._message_box.check_deadlines()
-                deadline_delay = deadline - get_running_loop().time()
-                if deadline_delay > 0:
-                    # Don't bother sleeping and timing out if the delay is already 0 (pollutes the logs).
-                    try:
-                        updates = await asyncio.wait_for(self._updates_queue.get(), deadline_delay)
-                    except asyncio.TimeoutError:
-                        self._log[__name__].debug('Timeout waiting for updates expired')
-                        continue
+                if self._updates_queue.qsize():
+                    updates = await self._updates_queue.get()
                 else:
                     continue
 
